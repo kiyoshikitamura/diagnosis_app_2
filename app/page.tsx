@@ -1,157 +1,134 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import resultDataRaw from '@/data/result_data.json';
 import questionsData from '@/data/questions.json';
 
-const COMMON_LIMIT = 10;
+const resultData = resultDataRaw as Record<string, any>;
 
-export default function DiagnosisPage() {
+export default function ResultPage() {
     const router = useRouter();
+    const [result, setResult] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    // --- 状態管理 ---
-    const [isStarted, setIsStarted] = useState(false); // 診断開始フラグ
-    const [answers, setAnswers] = useState<Record<number, number>>({});
-    const [isSecondPhase, setIsSecondPhase] = useState(false);
-    const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
+    useEffect(() => {
+        const savedAnswers = localStorage.getItem('diagnosis_answers');
+        if (!savedAnswers) { router.push('/diagnosis'); return; }
 
-    // --- ロジック（フィルタリング等） ---
-    const displayQuestions = useMemo(() => {
-        if (!isSecondPhase) {
-            return questionsData.filter(q => q.groupId === "common").slice(0, COMMON_LIMIT);
+        try {
+            const answers = JSON.parse(savedAnswers);
+            const scores: Record<string, number> = {};
+            Object.entries(answers).forEach(([qId, value]) => {
+                const question = questionsData.find(q => q.id === parseInt(qId));
+                if (question && question.groupId !== 'common') {
+                    scores[question.groupId] = (scores[question.groupId] || 0) + (value as number);
+                }
+            });
+            const topGroupId = Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0];
+            const finalResult = topGroupId && resultData[topGroupId] ? resultData[topGroupId] : Object.values(resultData)[0];
+            setResult(finalResult);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-        const filtered = questionsData.filter(q => q.groupId === targetGroupId && q.groupId !== "common");
-        return filtered.length > 0 ? filtered : questionsData.slice(10, 40);
-    }, [isSecondPhase, targetGroupId]);
+    }, [router]);
 
-    const currentPageQuestions = useMemo(() => {
-        const start = currentStep === 0 ? 0 : (currentStep - 1) * 10;
-        return displayQuestions.slice(start, start + 10);
-    }, [displayQuestions, currentStep]);
+    // シェア用URLとテキスト
+    const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareText = result ? `性格診断の結果、私は「${result.animal_name}」タイプでした！\n#動物性格診断 #心理テスト\n` : '';
 
-    const handleAnswer = (questionId: number, value: number) => {
-        setAnswers(prev => ({ ...prev, [questionId]: value }));
+    const shareOnX = () => {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
     };
 
-    const nextStep = () => {
-        const allAnswered = currentPageQuestions.every(q => answers[q.id] !== undefined);
-        if (!allAnswered) return;
-
-        setIsTransitioning(true);
-        setTimeout(() => {
-            if (!isSecondPhase) {
-                const allGroups = Array.from(new Set(questionsData.map(q => q.groupId))).filter(g => g !== 'common' && g !== '');
-                const selectedGroup = allGroups.length > 0 ? allGroups[Math.floor(Math.random() * allGroups.length)] : "lion";
-                setTargetGroupId(selectedGroup);
-                setIsSecondPhase(true);
-                setCurrentStep(1);
-            } else if (currentStep < 3) {
-                setCurrentStep(prev => prev + 1);
-            } else {
-                localStorage.setItem('diagnosis_answers', JSON.stringify(answers));
-                router.push('/result');
-            }
-            window.scrollTo(0, 0);
-            setIsTransitioning(false);
-        }, 400);
+    const shareOnLine = () => {
+        window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank');
     };
 
-    const progress = (Object.keys(answers).length / 40) * 100;
+    if (loading || !result) return null;
 
-    // --- A. 開始画面 (Landing View) ---
-    if (!isStarted) {
-        return (
-            <div className="max-w-2xl mx-auto min-h-screen bg-white flex flex-col items-center justify-center px-6 py-12 font-sans text-slate-900">
-                <div className="w-full text-center space-y-8 animate-in fade-in zoom-in duration-700">
-                    <div className="space-y-4">
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight leading-tight">
-                            あなたの内なる動物<br /><span className="text-indigo-600 underline decoration-indigo-200 underline-offset-8">性格診断テスト</span>
-                        </h1>
-                        <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
-                            40個の質問に答えるだけで、あなたの深層心理に隠れた「動物タイプ」が明らかになります。
-                        </p>
-                    </div>
-
-                    <div className="py-10">
-                        {/* ここに将来的に16匹の集合画像を置くと完璧です */}
-                        <div className="w-32 h-32 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center mb-4">
-                            <span className="text-5xl">🦁</span>
-                        </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Estimated time: 3 mins</p>
-                    </div>
-
-                    <button
-                        onClick={() => setIsStarted(true)}
-                        className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all duration-200"
-                    >
-                        診断をはじめる
-                    </button>
-
-                    <p className="text-[10px] text-slate-300">
-                        ※回答は統計的に処理され、個人を特定することはありません。
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    // --- B. 診断メイン画面 ---
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-white pb-20 font-sans text-slate-900 overflow-x-hidden">
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md pt-4 pb-2 px-4 shadow-sm border-b border-slate-50">
-                <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold">
-                    <span>{isSecondPhase ? `Phase 2` : 'Phase 1: Common'}</span>
-                    <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-400 transition-all duration-700" style={{ width: `${progress}%` }} />
-                </div>
+        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans">
+            {/* ヘッダー */}
+            <div className="bg-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-xl">
+                <p className="text-indigo-200 font-bold tracking-widest text-xs mb-2 uppercase">Analysis Complete</p>
+                <h1 className="text-3xl font-black mb-2 tracking-tight">あなたは「{result.animal_name}」</h1>
+                <p className="text-indigo-100 text-sm opacity-90">{result.ad_title}</p>
             </div>
 
-            <div className={`px-5 py-6 transition-all duration-500 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-                {currentPageQuestions.map((q, idx) => (
-                    <div key={q.id} className="py-10 border-b border-slate-100 last:border-0">
-                        <p className="text-[17px] font-bold text-slate-800 mb-8 text-left px-1">
-                            <span className="text-indigo-500 mr-2 text-sm font-mono opacity-50">
-                                {(isSecondPhase ? 10 + (currentStep - 1) * 10 + idx + 1 : idx + 1).toString().padStart(2, '0')}
-                            </span>
-                            {q.question}
-                        </p>
+            <div className="px-6 -mt-12 space-y-6">
+                {/* メイン診断結果カード */}
+                <div className="bg-white rounded-3xl shadow-lg p-8 space-y-8 border border-white">
+                    <div className="w-32 h-32 bg-indigo-50 rounded-full mx-auto flex items-center justify-center text-5xl shadow-inner border-4 border-white">
+                        {result.emoji || '🐾'}
+                    </div>
 
-                        <div className="flex items-center justify-center gap-3 max-w-lg mx-auto">
-                            <span className="text-[10px] font-bold text-emerald-500 w-10 text-center leading-tight">そう思う</span>
-                            <div className="flex items-center justify-between flex-1 relative px-1 max-w-[260px]">
-                                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-slate-200 -translate-y-1/2 -z-10"></div>
-                                {[5, 4, 3, 2, 1].map((val) => {
-                                    const isSelected = answers[q.id] === val;
-                                    const sizeClass = val === 5 || val === 1 ? 'w-10 h-10' : val === 4 || val === 2 ? 'w-8 h-8' : 'w-6 h-6';
-                                    const activeColor = val > 3 ? 'bg-emerald-500 border-emerald-500' : val < 3 ? 'bg-red-500 border-red-500' : 'bg-slate-500 border-slate-500';
-
-                                    return (
-                                        <button
-                                            key={val}
-                                            onClick={() => handleAnswer(q.id, val)}
-                                            className={`rounded-full border-2 transition-all duration-300 relative ${sizeClass} ${isSelected ? `${activeColor} shadow-md scale-110` : 'bg-white border-slate-300'}`}
-                                        />
-                                    );
-                                })}
-                            </div>
-                            <span className="text-[10px] font-bold text-red-500 w-10 text-center leading-tight">そう思わない</span>
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <h2 className="text-lg font-bold text-slate-800 flex items-center">
+                                <span className="w-1.5 h-6 bg-indigo-500 rounded-full mr-3"></span>
+                                基本性格
+                            </h2>
+                            <p className="text-slate-600 leading-relaxed text-[15px] bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                {result.base_description}
+                            </p>
+                        </div>
+                        <div className="text-slate-600 leading-relaxed text-[15px] whitespace-pre-wrap">
+                            {result.result_text}
                         </div>
                     </div>
-                ))}
 
-                <div className="mt-12 px-2">
-                    <button
-                        onClick={nextStep}
-                        disabled={!currentPageQuestions.every(q => answers[q.id] !== undefined)}
-                        className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition-all ${currentPageQuestions.every(q => answers[q.id] !== undefined) ? 'bg-indigo-600 text-white active:scale-95' : 'bg-slate-100 text-slate-300'}`}
-                    >
-                        {isSecondPhase && currentStep === 3 ? '結果を表示する' : '次のステップへ'}
-                    </button>
+                    {/* SNSシェアセクション */}
+                    <div className="pt-6 border-t border-slate-100">
+                        <p className="text-center text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Share your result</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={shareOnX}
+                                className="flex items-center justify-center gap-2 py-3 bg-black text-white rounded-xl font-bold text-sm transition-transform active:scale-95"
+                            >
+                                <span className="text-lg">𝕏</span>でポスト
+                            </button>
+                            <button
+                                onClick={shareOnLine}
+                                className="flex items-center justify-center gap-2 py-3 bg-[#06C755] text-white rounded-xl font-bold text-sm transition-transform active:scale-95"
+                            >
+                                <span className="text-lg">LINE</span>で送る
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                {/* アフィリエイト・おすすめカード */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-6 border border-amber-100 shadow-sm">
+                    <div className="flex items-start gap-4">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm">
+                            <span className="text-2xl">🎁</span>
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-amber-800 text-[10px] font-black uppercase tracking-wider mb-1">Pick Up for You</p>
+                            <h3 className="text-slate-800 font-bold text-sm mb-2">{result.animal_name}タイプにおすすめ</h3>
+                            <p className="text-slate-500 text-xs mb-4 leading-relaxed">あなたの個性をさらに活かすためのアイテムをチェックしてみましょう。</p>
+                            <a
+                                href="https://px.a8.net/..." // ここに実際のアフィリエイトリンクを入れる
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block w-full py-3 bg-white text-amber-600 border border-amber-200 text-center rounded-xl font-bold text-sm shadow-sm hover:bg-amber-100 transition-colors"
+                            >
+                                詳細を見る
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* もう一度ボタン */}
+                <button
+                    onClick={() => router.push('/diagnosis')}
+                    className="w-full py-4 text-slate-400 font-bold text-sm hover:text-indigo-600 transition-colors"
+                >
+                    ← 診断をやり直す
+                </button>
             </div>
         </div>
     );
