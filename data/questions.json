@@ -1,0 +1,652 @@
+[
+    {
+        "id": 1,
+        "question": "最新のガジェットやテクノロジーの情報は、常にいち早くチェックしたい。",
+        "groupId": "common"
+    },
+    {
+        "id": 2,
+        "question": "周囲との調和を何より大切にし、グループの和を乱さないよう意識している。",
+        "groupId": "common"
+    },
+    {
+        "id": 3,
+        "question": "多少のリスクがあっても、自分の力で大きな成果や報酬を得たいという野心がある。",
+        "groupId": "common"
+    },
+    {
+        "id": 4,
+        "question": "困っている人がいると放っておけず、親身になってサポートすることに喜びを感じる。",
+        "groupId": "common"
+    },
+    {
+        "id": 5,
+        "question": "物事を進める際は、直感よりも過去のデータや論理的な根拠を重視する。",
+        "groupId": "common"
+    },
+    {
+        "id": 6,
+        "question": "自分のセンスや感性を活かして、新しいトレンドやスタイルを世の中に広めたい。",
+        "groupId": "common"
+    },
+    {
+        "id": 7,
+        "question": "組織のルールや規律を守ることは、自由に行動することよりも重要だと思う。",
+        "groupId": "common"
+    },
+    {
+        "id": 8,
+        "question": "自分の知らない世界や新しい体験に対して、強い好奇心と行動力を持っている。",
+        "groupId": "common"
+    },
+    {
+        "id": 9,
+        "question": "競争社会で勝ち抜くことよりも、安定した環境で長く働き続けることを望んでいる。",
+        "groupId": "common"
+    },
+    {
+        "id": 10,
+        "question": "自分のこだわりや専門性を追求し、一目置かれるスペシャリストを目指したい。",
+        "groupId": "common"
+    },
+    {
+        "id": 11,
+        "question": "最新の投資ニュースや経済動向は、毎日欠かさずチェックしている。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 12,
+        "question": "多少のリスクがあっても、リターンが大きいなら迷わず勝負に出る。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 13,
+        "question": "自分のビジネスやスキルが、将来的に世界規模で通用するかを常に考えている。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 14,
+        "question": "成功者の自伝や、最新のビジネス理論を学ぶことに時間と金を惜しまない。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 15,
+        "question": "SNSでの発信やパーソナルブランディングは、現代の必須スキルだと思う。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 16,
+        "question": "無駄な会議や非効率な慣習は、すぐにでも排除すべきだと感じる。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 17,
+        "question": "一度決めた目標は、どんな困難があっても最後までやり遂げる自信がある。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 18,
+        "question": "論理的に正しければ、周囲の反対を押し切ってでも実行すべきだ。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 19,
+        "question": "自分の仕事の成果は、数字や年収といった明確な基準で評価されたい。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 20,
+        "question": "新しいビジネスのアイデアを考えることが、何よりの楽しみだ。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 21,
+        "question": "自分の知らない高度な専門知識に触れると、強い知的興奮を覚える。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 22,
+        "question": "感情に流されず、常に客観的な視点で物事を判断することを心がけている。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 23,
+        "question": "複雑な課題を分析し、本質的な解決策を見つけることが得意だ。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 24,
+        "question": "他人に頼るよりも、自分一人で完結させる仕事の方が質が高いと思う。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 25,
+        "question": "目先の利益よりも、長期的なビジョンや戦略を立てることを重視する。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 26,
+        "question": "休日も仕事やスキルのことを考えてしまうほど、今の活動に没頭している。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 27,
+        "question": "自分の意見や考えを論理的に説明し、他人を説得することに長けている。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 28,
+        "question": "失敗を恐れるよりも、挑戦しないことの方が大きな損失だと感じる。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 29,
+        "question": "最先端のトレンドや文化を、自分のライフスタイルにいち早く取り入れたい。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 30,
+        "question": "人脈作りは戦略的に行うべきであり、自分にプラスになる人と積極的に関わりたい。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 31,
+        "question": "日々のルーチンワークをこなすことよりも、新しいプロジェクトを立ち上げる方が燃える。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 32,
+        "question": "自分の専門分野においては、誰にも負けないという強い自負がある。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 33,
+        "question": "世の中の不便や矛盾を見つけると、それを解決する仕組みを作りたくなる。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 34,
+        "question": "高い目標を達成するためなら、今のプライベートな時間を削ることも厭わない。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 35,
+        "question": "人から指示されるよりも、自分がリーダーシップをとって物事を動かしたい。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 36,
+        "question": "新しい技術やサービスを体験するためなら、遠出や高額な出費も苦にならない。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 37,
+        "question": "自分の価値を認めてもらうためには、常に最新の状態に自分をアップデートし続ける必要がある。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 38,
+        "question": "伝統や慣習よりも、効率的で合理的な方法を優先して選択する。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 39,
+        "question": "将来は特定の組織に依存せず、自分の名前とスキルで生きていきたい。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 40,
+        "question": "世の中を驚かせるような、画期的な何かを成し遂げたいという夢がある。",
+        "groupId": "male_casual"
+    },
+    {
+        "id": 41,
+        "question": "仕事において、指示待ちではなく自分から課題を見つけて動くことが当然だと思う。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 42,
+        "question": "感情的なコミュニケーションよりも、事実に基づいた冷静な議論を好む。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 43,
+        "question": "自分の時間を守るためには、重要でない誘いや依頼をはっきり断るべきだ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 44,
+        "question": "一過性のブームよりも、時代を超えて価値が変わらない本物を手に入れたい。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 45,
+        "question": "他人の評価を気にするより、自分が納得できる基準を達成することの方が大切だ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 46,
+        "question": "たとえ孤独になったとしても、自分の信念やスタイルを曲げたくない。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 47,
+        "question": "物事を決める際、周囲の意見を聞くよりも自分の直感や経験を信じることが多い。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 48,
+        "question": "読書や学習は、暇つぶしではなく自己投資としての重要な習慣である。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 49,
+        "question": "派手な自己アピールよりも、静かに実力を磨き結果で示す方が格好いいと思う。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 50,
+        "question": "自分を厳しく律し、健康や体調をコントロールすることもプロの責任だ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 51,
+        "question": "多人数で騒ぐパーティーよりも、信頼できる少人数での深い対話を好む。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 52,
+        "question": "自分の強みだけでなく、弱みも客観的に把握し、補うための努力をしている。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 53,
+        "question": "仕事の報酬は、単なる金銭だけでなく「どれだけ自由に動けるか」も重要だ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 54,
+        "question": "誰かの真似をするのではなく、自分にしかできない独自の領域を作りたい。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 55,
+        "question": "困難な壁にぶつかった時、それを「成長のチャンス」と捉えてワクワクする。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 56,
+        "question": "社会的な地位や肩書きよりも、実質的に何を成し遂げたかを重視する。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 57,
+        "question": "物事を単純化せず、裏に隠された意図や構造を深く読み解こうとする癖がある。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 58,
+        "question": "自分自身の成長が止まることを、何よりも恐ろしく感じる。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 59,
+        "question": "礼儀やマナーは、相手への敬意を示すための基本的なビジネススキルだと思う。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 60,
+        "question": "成功は運ではなく、徹底した準備と戦略によって引き寄せるものだ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 61,
+        "question": "流行のファッションやコスメの情報は、SNSで毎日欠かさずチェックしている。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 62,
+        "question": "自分を美しく魅せるための努力（自分磨き）は、人生を楽しくする不可欠な要素だ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 63,
+        "question": "週末は話題のカフェや新スポットへ行き、素敵な写真を残すのが楽しみだ。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 64,
+        "question": "人から褒められたり、注目を浴びたりすると、もっと頑張ろうという意欲が湧く。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 65,
+        "question": "部屋のインテリアや小物にはこだわりがあり、お気に入りの空間で過ごしたい。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 66,
+        "question": "新しい服やアクセサリーを買うと、明日からの活力がみなぎるのを感じる。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 67,
+        "question": "誰に対しても明るく接し、場の雰囲気を和やかにすることを常に考えている。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 68,
+        "question": "旬のスイーツや美味しいレストランの情報には、周囲の誰よりも詳しい自信がある。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 69,
+        "question": "占いや心理テストが好きで、自分の新しい一面を発見することに興味がある。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 70,
+        "question": "旅行を計画する際は、移動手段から宿泊先まで徹底的に調べて最高の一日にしたい。",
+        "groupId": "male_highclass"
+    },
+    {
+        "id": 71,
+        "question": "人との繋がりを広げることが得意で、初対面の人ともすぐに打ち解けられる。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 72,
+        "question": "季節の行事やイベントは全力で楽しみ、思い出を形に残したい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 73,
+        "question": "スキンケアやボディメイクなど、理想の自分に近づくためのケアを欠かさない。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 74,
+        "question": "周囲から「センスが良いね」と言われることが、何よりの喜びである。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 75,
+        "question": "多少高くても、自分の気分を上げてくれる特別なアイテムなら迷わず購入する。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 76,
+        "question": "悩み事があるときは、一人で抱え込まずに信頼できる友人に話してスッキリしたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 77,
+        "question": "仕事のやりがいも大切だが、プライベートとのバランスを最も重視している。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 78,
+        "question": "可愛い雑貨やキャラクターなど、癒やしを感じるものに囲まれて暮らしたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 79,
+        "question": "自分の知らない分野の勉強を始めることに、常に前向きでワクワクする。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 80,
+        "question": "人生一度きりだから、好きなことには全力で時間と情熱を注ぎたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 81,
+        "question": "自分の意見をはっきり主張し、妥協せずに納得のいくまで話し合う強さがある。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 82,
+        "question": "直感的に「これが正解だ」と感じたことは、迷わず即実行に移す方だ。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 83,
+        "question": "他人に頼ることなく、自分のキャリアや人生は自分の力で切り拓いていきたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 84,
+        "question": "物事の本質を鋭く見抜き、周囲が気づかないリスクや可能性を指摘できる。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 85,
+        "question": "自分だけの譲れないこだわりや「マイルール」をいくつか持っている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 86,
+        "question": "どんなに忙しくても、自分一人の静かな時間を確保しないとストレスが溜まる。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 87,
+        "question": "感情に左右されず、常に凛とした態度で接することを自分に課している。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 88,
+        "question": "物静かだと言われることもあるが、内面には誰にも負けない強い情熱を秘めている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 89,
+        "question": "最先端のアートやデザインに触れることで、新しいインスピレーションを得るのが好きだ。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 90,
+        "question": "一過性の人間関係よりも、深く信頼し合える数少ない絆を何より大切にする。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 91,
+        "question": "現状に満足することなく、常に「もっと上を目指せる」と自分を鼓舞している。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 92,
+        "question": "周囲と同じであることを嫌い、独自の個性やスタイルを持つことに誇りを感じる。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 93,
+        "question": "高い目標を掲げ、それを達成するための緻密な計画を立てることが得意だ。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 94,
+        "question": "仕事において、誰かの代わりではなく自分にしかできない役割を果たしたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 95,
+        "question": "困難な課題ほど「解いてみせる」と燃える、探求心と忍耐強さを持っている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 96,
+        "question": "自分の選んだ道がたとえ険しくても、後悔せずに突き進む覚悟ができている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 97,
+        "question": "最新のビジネストレンドや世界情勢についても、日常的にアンテナを張っている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 98,
+        "question": "自分のスキルを磨き続け、一生現役で働き続けられるような強さを身につけたい。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 99,
+        "question": "人からどう見られるかより、自分がどうありたいかを最優先に考えている。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 100,
+        "question": "自立した女性として、経済的にも精神的にも自由であることを目指している。",
+        "groupId": "female_casual"
+    },
+    {
+        "id": 101,
+        "question": "周囲の状況を常に観察し、困っている人がいれば自然と手を差し伸べることができる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 102,
+        "question": "派手なことよりも、日々のささやかな幸せや安定した時間を大切にしたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 103,
+        "question": "何事も「なんとかなる」と楽観的に捉え、穏やかな気持ちで過ごすことを心がけている。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 104,
+        "question": "買い物をする際は、流行よりも「長く使えるか」「コスパが良いか」を重視する。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 105,
+        "question": "突飛なアイデアよりも、地に足の着いた現実的な解決策を信頼する。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 106,
+        "question": "派手な生活よりも、慎ましいけれど質の高い、丁寧な暮らしを理想とする。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 107,
+        "question": "自分の意見を押し通すより、周囲の意見を調整してまとめる方が得意だ。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 108,
+        "question": "健康管理や食生活には気を配り、規則正しい生活を送るよう意識している。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 109,
+        "question": "困った時に頼れるのは、新しい知人より長く付き合ってきた古い友人だ。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 110,
+        "question": "誰かの役に立っているという実感が、自分の生きがいや自信に繋がる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 111,
+        "question": "リスクの高い投資や挑戦よりも、着実な貯蓄や守りの姿勢を大切にしたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 112,
+        "question": "目立つ場所でリーダーをやるより、裏方でサポートする方が実力を発揮できる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 113,
+        "question": "整理整頓や掃除をすることで、心が整い、前向きな気持ちになれる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 114,
+        "question": "物事のルールやマナーを重んじ、礼儀正しい振る舞いを心がけている。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 115,
+        "question": "予期せぬトラブルにも動じないよう、常に最善の準備をしておきたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 116,
+        "question": "家族や身近な人との時間を何より優先し、大切に守り抜きたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 117,
+        "question": "自分一人が成功するよりも、チーム全体が良くなることの方が嬉しい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 118,
+        "question": "謙虚であることを美徳とし、常に感謝の気持ちを忘れないようにしている。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 119,
+        "question": "無駄遣いをせず、本当に価値があると思うものにだけお金を使いたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 120,
+        "question": "日々のルーチンを淡々とこなすことで、安心感と充実感を得られる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 121,
+        "question": "動物や自然と触れ合う時間に、何よりの癒やしと喜びを感じる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 122,
+        "question": "人の長所を見つけるのが得意で、誰に対しても寛容な心で接することができる。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 123,
+        "question": "自分を厳しく追い込むよりも、自分のペースで着実に歩むことが自分に合っている。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 124,
+        "question": "手作りの料理や趣味など、手間暇かけたプロセスを大切に楽しみたい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 125,
+        "question": "争い事が苦手で、意見が対立したときは歩み寄る道を模索する方だ。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 126,
+        "question": "伝統的な知恵や、歴史のある場所に身を置くことで心が安らぐ。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 127,
+        "question": "自分から前に出るよりも、聞き役に回って相手の話を尊重することが多い。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 128,
+        "question": "派手なキャリアよりも、地域や社会の役に立つ身近な活動に貢献したい。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 129,
+        "question": "自分の弱さを素直に認め、周囲に助けを求めることも大切だと思う。",
+        "groupId": "female_highclass"
+    },
+    {
+        "id": 130,
+        "question": "一生を通じて、誰かと深く温かい繋がりを持ち続けることが人生の目標だ。",
+        "groupId": "female_highclass"
+    }
+]
