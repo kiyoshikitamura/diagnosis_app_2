@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import questionsData from '@/data/questions.json';
+import questionsData from '../data/questions.json';
 
 const COMMON_LIMIT = 10;
 
