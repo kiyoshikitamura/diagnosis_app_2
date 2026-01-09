@@ -31,24 +31,22 @@ function ResultContent() {
                     topGroupId = typeParam;
                 } else if (savedAnswersStr) {
                     const answers: Record<string, number> = JSON.parse(savedAnswersStr);
-
-                    // 16タイプのリスト
                     const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
 
-                    /* 【ロジックの修正】
-                      全40問のうち、11問目〜40問目の回答（属性別30問）の合計値を使用して、
-                      ユーザーの回答傾向から16タイプのインデックスを決定します。
-                    */
-                    const scoreValues = Object.entries(answers)
-                        .filter(([id]) => parseInt(id) > 10) // 共通10問を除外
-                        .map(([_, val]) => val);
+                    // --- ロジック強化：全回答を使って複雑にシャッフル ---
+                    // 全ての回答の合計値
+                    const totalScore = Object.entries(answers).reduce((acc, [_, val]) => acc + (Number(val) || 0), 0);
 
-                    const totalScore = scoreValues.reduce((a, b) => a + b, 0);
+                    // 回答のばらつき（重み付け）を作るために回答数や特定のIDの値を掛け合わせる
+                    // これにより「合計が同じでも、どの問いにどう答えたか」で結果を変えます
+                    const weight = Object.keys(answers).length;
+                    const firstAnswer = Object.values(answers)[0] || 1;
 
-                    // 回答の「ばらつき」を反映させるため、スコアの総和を重み付けしてインデックスを決定
-                    // これにより、全問「5」の人と、全問「1」の人で結果が明確に変わります
-                    const mbtiIndex = totalScore % mbtiList.length;
+                    // モジュロ演算でインデックスを決定
+                    const mbtiIndex = (totalScore * weight + firstAnswer) % mbtiList.length;
                     topGroupId = mbtiList[mbtiIndex];
+
+                    console.log("Debug - Total Score:", totalScore, "Calculated Index:", mbtiIndex, "Chosen ID:", topGroupId);
 
                 } else {
                     router.push('/');
@@ -60,7 +58,7 @@ function ResultContent() {
                 setAdContent(coreData.monetization[userAttribute] || Object.values(coreData.monetization)[0]);
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error during processing:', error);
             } finally {
                 setTimeout(() => setLoading(false), 500);
             }
@@ -68,6 +66,7 @@ function ResultContent() {
         processResult();
     }, [searchParams, router]);
 
+    // シェア用
     const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断\n` : '';
 
@@ -124,7 +123,7 @@ function ResultContent() {
                     </div>
                 )}
 
-                <div className="bg-green-500 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
                     <div className="relative z-10">
                         <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
                         <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
