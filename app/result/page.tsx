@@ -141,7 +141,7 @@ function ResultContent() {
                     <div className="relative z-10">
                         <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
                         <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
-                        <a href="https://line.me/R/ti/p/YOUR_LINE_ID" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform">
+                        <a href="https://lin.ee/1e3TG7p" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform">
                             LINE公式アカウントを登録
                         </a>
                     </div>
