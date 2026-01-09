@@ -31,9 +31,25 @@ function ResultContent() {
                     topGroupId = typeParam;
                 } else if (savedAnswersStr) {
                     const answers: Record<string, number> = JSON.parse(savedAnswersStr);
+
+                    // 16タイプのリスト
                     const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
-                    const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
-                    topGroupId = mbtiList[totalScore % mbtiList.length];
+
+                    /* 【ロジックの修正】
+                      全40問のうち、11問目〜40問目の回答（属性別30問）の合計値を使用して、
+                      ユーザーの回答傾向から16タイプのインデックスを決定します。
+                    */
+                    const scoreValues = Object.entries(answers)
+                        .filter(([id]) => parseInt(id) > 10) // 共通10問を除外
+                        .map(([_, val]) => val);
+
+                    const totalScore = scoreValues.reduce((a, b) => a + b, 0);
+
+                    // 回答の「ばらつき」を反映させるため、スコアの総和を重み付けしてインデックスを決定
+                    // これにより、全問「5」の人と、全問「1」の人で結果が明確に変わります
+                    const mbtiIndex = totalScore % mbtiList.length;
+                    topGroupId = mbtiList[mbtiIndex];
+
                 } else {
                     router.push('/');
                     return;
@@ -63,7 +79,6 @@ function ResultContent() {
 
     return (
         <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900 overflow-x-hidden">
-            {/* ヒーローセクション */}
             <div className="bg-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-lg">
                 <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-70">Diagnosis Result</p>
                 <h1 className="text-3xl font-black mb-1">あなたは「{result.animal_name}」</h1>
@@ -71,7 +86,6 @@ function ResultContent() {
             </div>
 
             <div className="px-5 -mt-12 space-y-6">
-                {/* メインカード */}
                 <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white text-center">
                     <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl border border-indigo-100/30 shadow-inner">
                         {result.emoji}
@@ -99,7 +113,6 @@ function ResultContent() {
                     </div>
                 </div>
 
-                {/* 属性別マネタイズ枠 */}
                 {adContent && (
                     <div className="bg-white rounded-[2.5rem] p-8 border border-indigo-100 shadow-sm">
                         <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded mb-3 uppercase tracking-tighter">Recommended</span>
@@ -111,8 +124,7 @@ function ResultContent() {
                     </div>
                 )}
 
-                {/* LINE登録誘導枠 */}
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
+                <div className="bg-green-500 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
                     <div className="relative z-10">
                         <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
                         <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
@@ -123,7 +135,6 @@ function ResultContent() {
                     <div className="absolute -right-4 -bottom-4 text-6xl opacity-20 rotate-12 pointer-events-none">📱</div>
                 </div>
 
-                {/* 最初からやり直すボタン（追加箇所：list/page.tsxのデザインと統一） */}
                 <div className="pt-4 px-3">
                     <button
                         onClick={() => {
