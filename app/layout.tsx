@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Footer from "./components/Footer"; // ← 追加
+import Footer from "./components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,18 +12,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-}: Readonly<{
+}: {
     children: React.ReactNode;
-}>) {
+}) {
     return (
         <html lang="ja">
-            <body className={`${inter.className} bg-slate-50 flex flex-col min-h-screen`}>
-                {/* メインコンテンツ */}
+            {/* min-h-screen を付与してフッターが沈むように調整 */}
+            <body className={`${inter.className} bg-slate-50 min-h-screen flex flex-col`}>
+                {/* main に flex-grow をつけることでコンテンツが少ないときもフッターを下に固定 */}
                 <main className="flex-grow">
                     {children}
                 </main>
-
-                {/* フッターをここに追加 */}
                 <Footer />
             </body>
         </html>
