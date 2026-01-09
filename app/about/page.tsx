@@ -36,13 +36,13 @@ export default function AboutPage() {
                             <tr className="border-b border-slate-100">
                                 <th className="py-4 text-left text-slate-500 font-medium">お問い合わせ</th>
                                 <td className="py-4 text-slate-800">
-                                    <p className="mb-1 italic">info@daiakksindan.jp</p>
+                                    <p className="mb-1 italic">daiakksindan@gmail.com</p>
                                     <p className="text-[10px] text-slate-400">※上記アドレス、または公式LINEより受け付けております。</p>
                                 </td>
                             </tr>
                             <tr>
                                 <th className="py-4 text-left text-slate-500 font-medium">公式サイト</th>
-                                <td className="py-4 text-slate-800">https://daiakksindan.jp</td>
+                                <td className="py-4 text-slate-800">https://www.daiakksindan.jp</td>
                             </tr>
                         </tbody>
                     </table>
