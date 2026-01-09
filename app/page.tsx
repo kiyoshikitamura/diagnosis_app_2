@@ -1,125 +1,118 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import resultDataRaw from '@/data/result_data.json';
-import questionsData from '@/data/questions.json';
+import questionsData from '../data/questions.json';
 
-const resultData = resultDataRaw as Record<string, any>;
-
-export default function ResultPage() {
+export default function HomePage() {
     const router = useRouter();
-    const [result, setResult] = useState<any>(null);
-    const [adContent, setAdContent] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [isStarted, setIsStarted] = useState(false);
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    const [isSecondPhase, setIsSecondPhase] = useState(false);
+    const [userAttribute, setUserAttribute] = useState<string | null>(null);
+    const [currentStep, setCurrentStep] = useState(0); // 0:共通, 1:属性別P1, 2:属性別P2, 3:属性別P3
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-    useEffect(() => {
-        const savedAnswers = localStorage.getItem('diagnosis_answers');
-        const userAttribute = localStorage.getItem('user_attribute') || 'cas_male';
+    // 共通10問から属性を判定
+    const determineAttribute = (allAnswers: Record<number, number>) => {
+        const genderScore = ((allAnswers[1] || 3) + (allAnswers[2] || 3) + (allAnswers[3] || 3) + (allAnswers[4] || 3) + (allAnswers[5] || 3)) / 5;
+        const classScore = ((allAnswers[6] || 3) + (allAnswers[7] || 3) + (allAnswers[8] || 3) + (allAnswers[9] || 3) + (allAnswers[10] || 3)) / 5;
+        const isMale = genderScore >= 3;
+        const isHigh = classScore >= 3;
+        if (isHigh && isMale) return 'high_male';
+        if (isHigh && !isMale) return 'high_female';
+        if (!isHigh && isMale) return 'cas_male';
+        return 'cas_female';
+    };
 
-        if (!savedAnswers) {
-            router.push('/');
-            return;
+    const displayQuestions = useMemo(() => {
+        if (!isSecondPhase) {
+            return questionsData.filter(q => q.groupId === "common").slice(0, 10);
         }
+        // 判定された属性に一致する30問を取得
+        return questionsData.filter(q => q.groupId === userAttribute);
+    }, [isSecondPhase, userAttribute]);
 
-        try {
-            const answers = JSON.parse(savedAnswers);
-            const scores: Record<string, number> = {};
-            Object.entries(answers).forEach(([qId, value]) => {
-                const question = questionsData.find(q => q.id === parseInt(qId));
-                if (question && question.groupId !== 'common') {
-                    scores[question.groupId] = (scores[question.groupId] || 0) + (value as number);
-                }
-            });
+    const currentPageQuestions = useMemo(() => {
+        const start = isSecondPhase ? (currentStep - 1) * 10 : 0;
+        return displayQuestions.slice(start, start + 10);
+    }, [displayQuestions, currentStep, isSecondPhase]);
 
-            const topGroupId = Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || 'entj';
-            const coreData = resultData[topGroupId];
-            if (coreData) {
-                setResult(coreData);
-                setAdContent(coreData.monetization[userAttribute]);
-            }
-        } catch (error) {
-            router.push('/');
-        } finally {
-            setLoading(false);
+    const handleAnswer = (questionId: number, value: number) => {
+        setAnswers(prev => ({ ...prev, [questionId]: value }));
+    };
+
+    const nextStep = () => {
+        if (!isSecondPhase) {
+            const attr = determineAttribute(answers);
+            setUserAttribute(attr);
+            setIsSecondPhase(true);
+            setCurrentStep(1);
+        } else if (currentStep < 3) {
+            setCurrentStep(prev => prev + 1);
+        } else {
+            setIsAnalyzing(true);
+            localStorage.setItem('diagnosis_answers', JSON.stringify(answers));
+            localStorage.setItem('user_attribute', userAttribute || 'cas_male');
+            setTimeout(() => router.push('/result'), 1800);
         }
-    }, [router]);
+        window.scrollTo(0, 0);
+    };
 
-    const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断 #才能プロファイリング\n` : '';
+    if (isAnalyzing) {
+        return (
+            <div className="max-w-2xl mx-auto min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+                <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <h2 className="text-xl font-bold text-slate-800">英雄の魂を照合中...</h2>
+            </div>
+        );
+    }
 
-    const shareOnX = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-    const shareOnLine = () => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank');
-
-    if (loading || !result) return (
-        <div className="flex items-center justify-center min-h-screen bg-white">
-            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-    );
+    if (!isStarted) {
+        return (
+            <div className="max-w-2xl mx-auto min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+                <h1 className="text-3xl font-black text-slate-800 mb-4">歴史の偉人が教える<br /><span className="text-indigo-600">あなたの「才能」鑑定</span></h1>
+                <div className="w-32 h-32 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 text-5xl">🏛️</div>
+                <button onClick={() => setIsStarted(true)} className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl">診断をはじめる</button>
+            </div>
+        );
+    }
 
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
-            <div className="bg-gradient-to-b from-indigo-500 to-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-md">
-                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-80">Profiling Complete</p>
-                <h1 className="text-3xl font-black mb-1 tracking-tight">
-                    あなたは「{result.animal_name}」タイプ
-                </h1>
-                <p className="text-indigo-50/90 text-sm font-medium italic">{result.catchphrase}</p>
+        <div className="max-w-2xl mx-auto min-h-screen bg-white pb-20">
+            <div className="sticky top-0 bg-white/90 backdrop-blur pt-4 pb-2 px-5 border-b border-slate-100">
+                <div className="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
+                    <span>PROGRESS</span>
+                    <span>{Math.round((Object.keys(answers).length / 40) * 100)}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${(Object.keys(answers).length / 40) * 100}%` }} />
+                </div>
             </div>
 
-            <div className="px-5 -mt-12 space-y-6">
-                <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white">
-                    <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl shadow-inner border border-indigo-100/50">
-                        {result.emoji}
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="space-y-3">
-                            <h2 className="text-[14px] font-black text-indigo-600 flex items-center justify-center bg-indigo-50/50 py-2.5 rounded-full uppercase tracking-widest">
-                                Identity Profile
-                            </h2>
-                            <p className="text-slate-600 leading-relaxed text-[15px] px-2 text-center font-medium">
-                                {result.base_description}
-                            </p>
-                        </div>
-
-                        <div className="bg-slate-50/80 p-6 rounded-3xl text-slate-600 leading-relaxed text-[14px] whitespace-pre-wrap border border-slate-100">
-                            {result.result_text}
+            <div className="px-5 py-6">
+                {currentPageQuestions.map((q) => (
+                    <div key={q.id} className="py-8 border-b border-slate-50 last:border-0">
+                        <p className="text-lg font-bold text-slate-800 mb-6">{q.question}</p>
+                        <div className="flex justify-between items-center gap-2 max-w-sm mx-auto">
+                            <span className="text-[10px] font-bold text-indigo-400">同意</span>
+                            {[5, 4, 3, 2, 1].map((val) => (
+                                <button
+                                    key={val}
+                                    onClick={() => handleAnswer(q.id, val)}
+                                    className={`w-10 h-10 rounded-full border-2 transition-all ${answers[q.id] === val ? 'bg-indigo-600 border-indigo-600 scale-110 shadow-lg' : 'bg-white border-slate-200'}`}
+                                />
+                            ))}
+                            <span className="text-[10px] font-bold text-slate-400">不同意</span>
                         </div>
                     </div>
-
-                    <div className="pt-6 border-t border-slate-50">
-                        <p className="text-center text-[10px] font-bold text-slate-300 mb-4 uppercase tracking-widest text-center">Share your result</p>
-                        <div className="grid grid-cols-2 gap-3 px-2">
-                            <button onClick={shareOnX} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shadow-sm">𝕏でシェア</button>
-                            <button onClick={shareOnLine} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shadow-sm">LINEで送る</button>
-                        </div>
-                    </div>
-                </div>
-
-                {adContent && (
-                    <div className="bg-white rounded-[2.5rem] p-1.5 border border-indigo-100 shadow-sm overflow-hidden">
-                        <div className="bg-gradient-to-br from-indigo-50/50 to-white p-7 rounded-[2rem]">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="px-2.5 py-1 bg-indigo-600 text-white text-[9px] font-black rounded-lg uppercase tracking-wider">For You</span>
-                            </div>
-                            <h3 className="text-[17px] font-bold mb-2 text-slate-800 tracking-tight">{adContent.ad_title}</h3>
-                            <p className="text-slate-500 text-xs mb-6 leading-relaxed">{adContent.ad_text}</p>
-                            <a
-                                href="#"
-                                className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
-                            >
-                                {adContent.ad_link_text}
-                            </a>
-                        </div>
-                    </div>
-                )}
-
+                ))}
                 <button
-                    onClick={() => router.push('/')}
-                    className="w-full py-6 text-slate-300 font-bold text-xs tracking-[0.2em] hover:text-indigo-500 transition-colors uppercase"
+                    onClick={nextStep}
+                    disabled={currentPageQuestions.some(q => !answers[q.id])}
+                    className={`w-full py-5 mt-10 rounded-2xl font-bold transition-all ${currentPageQuestions.every(q => answers[q.id]) ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-300'}`}
                 >
-                    ← Retake Profiling
+                    {isSecondPhase && currentStep === 3 ? '結果を解析する' : '次のステップへ'}
                 </button>
             </div>
         </div>
