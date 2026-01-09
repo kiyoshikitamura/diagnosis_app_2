@@ -114,26 +114,35 @@ export default function HomePage() {
                             </div>
                             <p className="text-[15px] font-bold text-slate-700 leading-relaxed mb-8">{q.question}</p>
 
-                            <div className="flex justify-between items-center gap-1 max-w-sm mx-auto relative px-2">
-                                <span className="text-[10px] font-bold text-indigo-500 absolute -top-6 left-0">そう思う</span>
-                                <span className="text-[10px] font-bold text-slate-400 absolute -top-6 right-0">そう思わない</span>
+                            {/* 回答エリア：中央に向かってサイズが小さくなるデザイン */}
+                            <div className="flex justify-between items-center gap-1 max-w-sm mx-auto relative px-2 mt-10">
+                                <span className="text-[10px] font-bold text-indigo-500 absolute -top-8 left-0">そう思う</span>
+                                <span className="text-[10px] font-bold text-slate-400 absolute -top-8 right-0">そう思わない</span>
 
-                                {[5, 4, 3, 2, 1].map((val) => (
-                                    <button
-                                        key={val}
-                                        onClick={() => handleAnswer(q.id, val)}
-                                        className={`relative w-11 h-11 rounded-full border-2 transition-all duration-300
-                      ${answers[q.id] === val
-                                                ? 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-110'
-                                                : 'bg-white border-slate-100'
-                                            }`}
-                                    >
-                                        {/* 回答の丸をシンプルな中空デザイン（〇）に変更 */}
-                                        {answers[q.id] === val && (
-                                            <div className="absolute inset-1 rounded-full border-2 border-white animate-ping opacity-40" />
-                                        )}
-                                    </button>
-                                ))}
+                                {[5, 4, 3, 2, 1].map((val) => {
+                                    // 値に応じてサイズを変更 (5,1は最大, 4,2は中, 3は最小)
+                                    const sizeClass =
+                                        val === 5 || val === 1 ? 'w-11 h-11' :
+                                            val === 4 || val === 2 ? 'w-9 h-9' :
+                                                'w-7 h-7';
+
+                                    return (
+                                        <button
+                                            key={val}
+                                            onClick={() => handleAnswer(q.id, val)}
+                                            className={`relative ${sizeClass} rounded-full border-2 transition-all duration-300 flex-shrink-0
+                        ${answers[q.id] === val
+                                                    ? 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-110'
+                                                    : 'bg-white border-slate-200'
+                                                }`}
+                                        >
+                                            {/* 回答の丸をシンプルな中空デザイン（〇）に変更しつつ、選択時のアニメーションを維持 */}
+                                            {answers[q.id] === val && (
+                                                <div className="absolute inset-0 rounded-full border-2 border-white animate-ping opacity-40" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     );
