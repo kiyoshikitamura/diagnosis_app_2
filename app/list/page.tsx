@@ -24,11 +24,6 @@ export default function ListPage() {
     const router = useRouter();
     const mbtiList = Object.keys(resultData);
 
-    // 自分の診断結果ページへ戻る（クエリパラメータなしで遷移）
-    const handleBackToMyResult = () => {
-        router.push('/result');
-    };
-
     return (
         <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
             <div className="bg-indigo-600 pt-12 pb-20 px-6 text-center text-white rounded-b-[2.5rem] shadow-lg">
@@ -57,8 +52,9 @@ export default function ListPage() {
                                 <div className="flex items-center gap-2 mb-0.5">
                                     <h3 className="text-[16px] font-bold text-slate-800 truncate">{person.animal_name}</h3>
                                 </div>
-                                <p className="text-[12px] text-slate-500 leading-snug line-clamp-2">
-                                    {person.base_description}
+                                {/* ここを base_description から catchphrase に変更しました */}
+                                <p className="text-[12px] text-indigo-500 font-medium leading-snug line-clamp-1 italic">
+                                    {person.catchphrase}
                                 </p>
                             </div>
                             <div className="text-slate-300">
@@ -71,10 +67,9 @@ export default function ListPage() {
                 })}
             </div>
 
-            {/* アクションボタンエリア */}
             <div className="mt-12 px-8 space-y-4">
                 <button
-                    onClick={handleBackToMyResult}
+                    onClick={() => router.push('/result')}
                     className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-100 active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
                 >
                     <span>✨</span>
