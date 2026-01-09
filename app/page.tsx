@@ -1,142 +1,126 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import questionsData from '../data/questions.json';
+import resultDataRaw from '@/data/result_data.json';
+import questionsData from '@/data/questions.json';
 
-const COMMON_LIMIT = 10;
+const resultData = resultDataRaw as Record<string, any>;
 
-export default function HomePage() {
+export default function ResultPage() {
     const router = useRouter();
-    const [isStarted, setIsStarted] = useState(false);
-    const [answers, setAnswers] = useState<Record<number, number>>({});
-    const [isSecondPhase, setIsSecondPhase] = useState(false);
-    const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [result, setResult] = useState<any>(null);
+    const [adContent, setAdContent] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    const displayQuestions = useMemo(() => {
-        if (!isSecondPhase) return questionsData.filter(q => q.groupId === "common").slice(0, COMMON_LIMIT);
-        const filtered = questionsData.filter(q => q.groupId === targetGroupId && q.groupId !== "common");
-        return filtered.length > 0 ? filtered : questionsData.slice(10, 40);
-    }, [isSecondPhase, targetGroupId]);
+    useEffect(() => {
+        const savedAnswers = localStorage.getItem('diagnosis_answers');
+        const userAttribute = localStorage.getItem('user_attribute') || 'cas_male';
 
-    const currentPageQuestions = useMemo(() => {
-        const start = currentStep === 0 ? 0 : (currentStep - 1) * 10;
-        return displayQuestions.slice(start, start + 10);
-    }, [displayQuestions, currentStep]);
-
-    const handleAnswer = (questionId: number, value: number) => {
-        setAnswers(prev => ({ ...prev, [questionId]: value }));
-    };
-
-    const nextStep = () => {
-        if (isSecondPhase && currentStep === 3) {
-            setIsAnalyzing(true);
-            localStorage.setItem('diagnosis_answers', JSON.stringify(answers));
-            setTimeout(() => router.push('/result'), 1500);
+        if (!savedAnswers) {
+            router.push('/');
             return;
         }
-        setIsTransitioning(true);
-        setTimeout(() => {
-            if (!isSecondPhase) {
-                const groups = Array.from(new Set(questionsData.map(q => q.groupId))).filter(g => g !== 'common' && g !== '');
-                setTargetGroupId(groups[Math.floor(Math.random() * groups.length)] || "lion");
-                setIsSecondPhase(true);
-                setCurrentStep(1);
-            } else {
-                setCurrentStep(prev => prev + 1);
+
+        try {
+            const answers = JSON.parse(savedAnswers);
+            const scores: Record<string, number> = {};
+            Object.entries(answers).forEach(([qId, value]) => {
+                const question = questionsData.find(q => q.id === parseInt(qId));
+                if (question && question.groupId !== 'common') {
+                    scores[question.groupId] = (scores[question.groupId] || 0) + (value as number);
+                }
+            });
+
+            const topGroupId = Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || 'entj';
+            const coreData = resultData[topGroupId];
+            if (coreData) {
+                setResult(coreData);
+                setAdContent(coreData.monetization[userAttribute]);
             }
-            window.scrollTo(0, 0);
-            setIsTransitioning(false);
-        }, 400);
-    };
+        } catch (error) {
+            router.push('/');
+        } finally {
+            setLoading(false);
+        }
+    }, [router]);
 
-    const progress = (Object.keys(answers).length / 40) * 100;
+    const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断 #才能プロファイリング\n` : '';
 
-    if (isAnalyzing) return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6 text-center">
-            <div className="relative w-20 h-20 mb-8">
-                <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">深層心理を分析中...</h2>
-            <p className="text-slate-400 text-sm">あなたに最適な動物タイプを導き出しています</p>
-        </div>
-    );
+    const shareOnX = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    const shareOnLine = () => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank');
 
-    if (!isStarted) return (
-        <div className="max-w-2xl mx-auto min-h-screen flex flex-col items-center justify-center px-6 text-center bg-white">
-            <div className="space-y-8 animate-in fade-in zoom-in duration-700">
-                <h1 className="text-3xl font-black text-slate-800 leading-tight">
-                    あなたの内なる動物<br /><span className="text-indigo-600 underline underline-offset-8 decoration-indigo-100">性格診断テスト</span>
-                </h1>
-                <div className="w-32 h-32 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl shadow-inner">🦁</div>
-                <div className="space-y-2">
-                    <button onClick={() => setIsStarted(true)} className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl hover:bg-indigo-700 active:scale-95 transition-all">
-                        診断をはじめる
-                    </button>
-                    <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Estimated time: 3 mins</p>
-                </div>
-            </div>
+    if (loading || !result) return (
+        <div className="flex items-center justify-center min-h-screen bg-white">
+            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
     );
 
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-white pb-20 overflow-x-hidden">
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md pt-4 pb-2 px-4 border-b border-slate-50 shadow-sm">
-                <div className="flex justify-between text-[10px] text-slate-400 mb-1 font-bold uppercase">
-                    <span>{isSecondPhase ? 'Phase 2' : 'Phase 1'}</span>
-                    <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-400 transition-all duration-700" style={{ width: `${progress}%` }} />
-                </div>
+        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
+            <div className="bg-gradient-to-b from-indigo-500 to-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-md">
+                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-80">Profiling Complete</p>
+                <h1 className="text-3xl font-black mb-1 tracking-tight">
+                    あなたは「{result.animal_name}」タイプ
+                </h1>
+                <p className="text-indigo-50/90 text-sm font-medium italic">{result.catchphrase}</p>
             </div>
 
-            <div className={`px-5 py-6 transition-all duration-500 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-                {currentPageQuestions.map((q, idx) => (
-                    <div key={q.id} className="py-10 border-b border-slate-100 last:border-0">
-                        <p className="text-[17px] font-bold text-slate-800 mb-8 text-left leading-relaxed">
-                            <span className="text-indigo-500 mr-2 text-sm font-mono opacity-50">
-                                {(isSecondPhase ? 10 + (currentStep - 1) * 10 + idx + 1 : idx + 1).toString().padStart(2, '0')}
-                            </span>
-                            {q.question}
-                        </p>
-                        <div className="flex items-center justify-center gap-3 max-w-lg mx-auto">
-                            <span className="text-[10px] font-bold text-emerald-500 w-10 text-center leading-tight">そう思う</span>
-                            <div className="flex items-center justify-between flex-1 relative px-1 max-w-[260px]">
-                                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-slate-200 -translate-y-1/2 -z-10"></div>
-                                {[5, 4, 3, 2, 1].map((val) => {
-                                    const isSelected = answers[q.id] === val;
-                                    const sizeClass = val === 5 || val === 1 ? 'w-10 h-10' : val === 4 || val === 2 ? 'w-8 h-8' : 'w-6 h-6';
-                                    const activeColor = val > 3 ? 'bg-emerald-500 border-emerald-500' : val < 3 ? 'bg-red-500 border-red-500' : 'bg-slate-500 border-slate-500';
-                                    const borderColor = val > 3 ? 'border-emerald-300' : val < 3 ? 'border-red-300' : 'border-slate-300';
-                                    return (
-                                        <button
-                                            key={val}
-                                            onClick={() => handleAnswer(q.id, val)}
-                                            className={`rounded-full border-2 transition-all duration-300 relative ${sizeClass} ${isSelected ? `${activeColor} shadow-md scale-110` : `bg-white ${borderColor}`}`}
-                                        >
-                                            {isSelected && <span className="absolute inset-0 rounded-full animate-ping bg-current opacity-20"></span>}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <span className="text-[10px] font-bold text-red-500 w-10 text-center leading-tight">そう思わない</span>
+            <div className="px-5 -mt-12 space-y-6">
+                <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white">
+                    <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl shadow-inner border border-indigo-100/50">
+                        {result.emoji}
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <h2 className="text-[14px] font-black text-indigo-600 flex items-center justify-center bg-indigo-50/50 py-2.5 rounded-full uppercase tracking-widest">
+                                Identity Profile
+                            </h2>
+                            <p className="text-slate-600 leading-relaxed text-[15px] px-2 text-center font-medium">
+                                {result.base_description}
+                            </p>
+                        </div>
+
+                        <div className="bg-slate-50/80 p-6 rounded-3xl text-slate-600 leading-relaxed text-[14px] whitespace-pre-wrap border border-slate-100">
+                            {result.result_text}
                         </div>
                     </div>
-                ))}
-                <div className="mt-12 px-2">
-                    <button
-                        onClick={nextStep}
-                        disabled={!currentPageQuestions.every(q => answers[q.id] !== undefined)}
-                        className={`w-full py-4 rounded-xl font-bold text-base shadow-lg transition-all ${currentPageQuestions.every(q => answers[q.id] !== undefined) ? 'bg-indigo-600 text-white active:scale-95' : 'bg-slate-100 text-slate-300'}`}
-                    >
-                        {isSecondPhase && currentStep === 3 ? '結果を解析する' : '次のステップへ'}
-                    </button>
+
+                    <div className="pt-6 border-t border-slate-50">
+                        <p className="text-center text-[10px] font-bold text-slate-300 mb-4 uppercase tracking-widest text-center">Share your result</p>
+                        <div className="grid grid-cols-2 gap-3 px-2">
+                            <button onClick={shareOnX} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shadow-sm">𝕏でシェア</button>
+                            <button onClick={shareOnLine} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shadow-sm">LINEで送る</button>
+                        </div>
+                    </div>
                 </div>
+
+                {adContent && (
+                    <div className="bg-white rounded-[2.5rem] p-1.5 border border-indigo-100 shadow-sm overflow-hidden">
+                        <div className="bg-gradient-to-br from-indigo-50/50 to-white p-7 rounded-[2rem]">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="px-2.5 py-1 bg-indigo-600 text-white text-[9px] font-black rounded-lg uppercase tracking-wider">For You</span>
+                            </div>
+                            <h3 className="text-[17px] font-bold mb-2 text-slate-800 tracking-tight">{adContent.ad_title}</h3>
+                            <p className="text-slate-500 text-xs mb-6 leading-relaxed">{adContent.ad_text}</p>
+                            <a
+                                href="#"
+                                className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                            >
+                                {adContent.ad_link_text}
+                            </a>
+                        </div>
+                    </div>
+                )}
+
+                <button
+                    onClick={() => router.push('/')}
+                    className="w-full py-6 text-slate-300 font-bold text-xs tracking-[0.2em] hover:text-indigo-500 transition-colors uppercase"
+                >
+                    ← Retake Profiling
+                </button>
             </div>
         </div>
     );
