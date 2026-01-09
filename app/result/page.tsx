@@ -10,7 +10,6 @@ interface AdContent { ad_title: string; ad_text: string; ad_link_text: string; }
 interface ResultData { animal_name: string; emoji: string; catchphrase: string; base_description: string; result_text: string; monetization: Record<string, AdContent>; }
 
 const resultData = resultDataRaw as Record<string, ResultData>;
-const questionsData = questionsDataRaw as Question[];
 
 function ResultContent() {
     const router = useRouter();
@@ -29,10 +28,8 @@ function ResultContent() {
                 let topGroupId = '';
 
                 if (typeParam && resultData[typeParam]) {
-                    // URLにタイプ指定がある場合はそれを優先（リストからの遷移）
                     topGroupId = typeParam;
                 } else if (savedAnswersStr) {
-                    // 指定がない場合は診断結果から計算
                     const answers: Record<string, number> = JSON.parse(savedAnswersStr);
                     const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
                     const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
@@ -65,14 +62,16 @@ function ResultContent() {
     );
 
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
+        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900 overflow-x-hidden">
+            {/* ヒーローセクション */}
             <div className="bg-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-lg">
-                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-70">Result</p>
+                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-70">Diagnosis Result</p>
                 <h1 className="text-3xl font-black mb-1">あなたは「{result.animal_name}」</h1>
                 <p className="text-indigo-50/80 text-sm font-medium italic">{result.catchphrase}</p>
             </div>
 
             <div className="px-5 -mt-12 space-y-6">
+                {/* メインカード */}
                 <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white text-center">
                     <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl border border-indigo-100/30 shadow-inner">
                         {result.emoji}
@@ -84,40 +83,66 @@ function ResultContent() {
                             {result.result_text}
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 pt-4">
-                        <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs">𝕏でシェア</button>
-                        <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs">LINEで送る</button>
+
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3 pt-4">
+                            <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">𝕏でシェア</button>
+                            <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">LINEで送る</button>
+                        </div>
+
+                        <button
+                            onClick={() => router.push('/list')}
+                            className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100 shadow-sm active:scale-95 transition-all"
+                        >
+                            他の偉人タイプ（全16種）をすべて見る →
+                        </button>
                     </div>
-                    <button onClick={() => router.push('/list')} className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100">
-                        他の偉人タイプをすべて見る →
-                    </button>
                 </div>
 
+                {/* 属性別マネタイズ枠 */}
                 {adContent && (
                     <div className="bg-white rounded-[2.5rem] p-8 border border-indigo-100 shadow-sm">
-                        <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded mb-3 uppercase">Recommended</span>
+                        <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded mb-3 uppercase tracking-tighter">Recommended</span>
                         <h3 className="text-lg font-bold mb-2 text-slate-800">{adContent.ad_title}</h3>
                         <p className="text-slate-500 text-xs mb-6 leading-relaxed">{adContent.ad_text}</p>
-                        <a href="#" className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100">
+                        <a href="#" className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100 active:scale-95 transition-transform">
                             {adContent.ad_link_text}
                         </a>
                     </div>
                 )}
 
-                <div className="bg-green-500 rounded-[2.5rem] p-8 text-white text-center shadow-lg">
-                    <h3 className="text-lg font-bold mb-2">さらに詳しい鑑定をLINEで受ける</h3>
-                    <p className="text-xs opacity-90 mb-6 font-medium">公式LINE限定「人生の戦略マップ」を無料配布中</p>
-                    <a href="https://line.me/R/ti/p/YOUR_LINE_ID" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm">LINE公式アカウントを登録</a>
+                {/* LINE登録誘導枠 */}
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
+                    <div className="relative z-10">
+                        <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
+                        <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
+                        <a href="https://line.me/R/ti/p/YOUR_LINE_ID" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform">
+                            LINE公式アカウントを登録
+                        </a>
+                    </div>
+                    <div className="absolute -right-4 -bottom-4 text-6xl opacity-20 rotate-12 pointer-events-none">📱</div>
+                </div>
+
+                {/* 最初からやり直すボタン（追加箇所：list/page.tsxのデザインと統一） */}
+                <div className="pt-4 px-3">
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('diagnosis_answers');
+                            router.push('/');
+                        }}
+                        className="w-full py-4 bg-white text-slate-500 rounded-2xl font-bold border border-slate-200 active:scale-95 transition-all text-xs tracking-widest uppercase shadow-sm"
+                    >
+                        最初からやり直す
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
 
-// useSearchParamsを使う場合はSuspenseで囲む必要があります（Next.jsの仕様）
 export default function ResultPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
             <ResultContent />
         </Suspense>
     );
