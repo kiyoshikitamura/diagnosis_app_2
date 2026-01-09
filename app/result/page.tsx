@@ -50,7 +50,6 @@ export default function ResultPage() {
                 const answers: Record<string, number> = JSON.parse(savedAnswersStr);
                 const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
 
-                // 判定ロジック：回答の合計からインデックスを算出（暫定安全策）
                 const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
                 const mbtiIndex = totalScore % mbtiList.length;
                 const topGroupId = mbtiList[mbtiIndex];
@@ -77,7 +76,6 @@ export default function ResultPage() {
         processResult();
     }, [router]);
 
-    // シェア用
     const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断 #才能プロファイリング\n` : '';
 
@@ -108,21 +106,30 @@ export default function ResultPage() {
                         {result.emoji}
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="space-y-3 text-center">
-                            <h2 className="inline-block px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-1">Your Identity</h2>
-                            <p className="text-slate-700 leading-relaxed text-base font-bold px-2">
-                                {result.base_description}
-                            </p>
-                        </div>
-                        <div className="bg-slate-50/80 p-6 rounded-3xl text-slate-600 leading-relaxed text-sm whitespace-pre-wrap border border-slate-100">
+                    <div className="space-y-6 text-center">
+                        <h2 className="inline-block px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">Your Identity</h2>
+                        <p className="text-slate-700 leading-relaxed text-base font-bold px-2">
+                            {result.base_description}
+                        </p>
+                        <div className="bg-slate-50/80 p-6 rounded-3xl text-slate-600 leading-relaxed text-sm whitespace-pre-wrap border border-slate-100 text-left">
                             {result.result_text}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-4">
-                        <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">𝕏でシェア</button>
-                        <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">LINEで送る</button>
+                    <div className="space-y-4">
+                        {/* SNSシェア */}
+                        <div className="grid grid-cols-2 gap-3 pt-4">
+                            <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">𝕏でシェア</button>
+                            <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">LINEで送る</button>
+                        </div>
+
+                        {/* 図鑑へのリンク：よりボタンらしく配置 */}
+                        <button
+                            onClick={() => router.push('/list')}
+                            className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100 shadow-sm active:scale-95 transition-all"
+                        >
+                            他の偉人タイプ（全16種）をすべて見る →
+                        </button>
                     </div>
                 </div>
 
@@ -138,17 +145,6 @@ export default function ResultPage() {
                     </div>
                 )}
 
-                {/* 他の偉人を見るリンク（追加箇所） */}
-                <div className="py-4 text-center">
-                    <button
-                        onClick={() => router.push('/list')}
-                        className="group flex items-center justify-center gap-2 mx-auto py-2 px-6 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
-                    >
-                        <span className="text-sm font-bold">全16タイプの偉人リストを見る</span>
-                        <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
-                    </button>
-                </div>
-
                 {/* LINE登録誘導枠 */}
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
                     <div className="relative z-10">
@@ -162,7 +158,7 @@ export default function ResultPage() {
                 </div>
 
                 <button onClick={() => router.push('/')} className="w-full py-6 text-slate-300 font-bold text-xs tracking-widest uppercase hover:text-indigo-500 transition-colors">
-                    ← Back to Entrance
+                    ← Back to Top
                 </button>
             </div>
         </div>
