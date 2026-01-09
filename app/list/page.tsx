@@ -52,12 +52,16 @@ export default function ListPage() {
                                 <div className="flex items-center gap-2 mb-0.5">
                                     <h3 className="text-[16px] font-bold text-slate-800 truncate">{person.animal_name}</h3>
                                 </div>
-                                {/* ここを base_description から catchphrase に変更しました */}
-                                <p className="text-[12px] text-indigo-500 font-medium leading-snug line-clamp-1 italic">
+                                {/* 修正箇所：
+                   - text-indigo-500 から text-slate-400 (目立たない色) へ変更
+                   - italic を削除 (より馴染むように)
+                   - line-clamp-1 から line-clamp-2 (2行表示) へ変更
+                */}
+                                <p className="text-[11px] text-slate-400 font-medium leading-snug line-clamp-2">
                                     {person.catchphrase}
                                 </p>
                             </div>
-                            <div className="text-slate-300">
+                            <div className="text-slate-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="9 5l7 7-7 7" />
                                 </svg>
