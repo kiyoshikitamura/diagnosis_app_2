@@ -33,21 +33,11 @@ function ResultContent() {
                     const answers: Record<string, number> = JSON.parse(savedAnswersStr);
                     const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
 
-                    // --- ロジック強化：全回答を使って複雑にシャッフル ---
-                    // 全ての回答の合計値
                     const totalScore = Object.entries(answers).reduce((acc, [_, val]) => acc + (Number(val) || 0), 0);
-
-                    // 回答のばらつき（重み付け）を作るために回答数や特定のIDの値を掛け合わせる
-                    // これにより「合計が同じでも、どの問いにどう答えたか」で結果を変えます
                     const weight = Object.keys(answers).length;
                     const firstAnswer = Object.values(answers)[0] || 1;
-
-                    // モジュロ演算でインデックスを決定
                     const mbtiIndex = (totalScore * weight + firstAnswer) % mbtiList.length;
                     topGroupId = mbtiList[mbtiIndex];
-
-                    console.log("Debug - Total Score:", totalScore, "Calculated Index:", mbtiIndex, "Chosen ID:", topGroupId);
-
                 } else {
                     router.push('/');
                     return;
@@ -66,34 +56,55 @@ function ResultContent() {
         processResult();
     }, [searchParams, router]);
 
-    // シェア用
     const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断\n` : '';
 
     if (loading || !result) return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-white text-center">
+            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-400 text-xs font-bold tracking-widest uppercase">Analyzing...</p>
         </div>
     );
 
+    // テキストの置換処理
+    const formattedResultText = result.result_text
+        .replace(/【あなたの魂が持つ真のポテンシャル】/g, '【あなたの真のポテンシャル】')
+        .replace(/【さらに飛躍するための生存戦略】/g, '【飛躍するためのアドバイス】');
+
     return (
         <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900 overflow-x-hidden">
+            {/* ヒーローセクション：2行構成へ修正 */}
             <div className="bg-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-lg">
-                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-70">Diagnosis Result</p>
-                <h1 className="text-3xl font-black mb-1">あなたは「{result.animal_name}」</h1>
-                <p className="text-indigo-50/80 text-sm font-medium italic">{result.catchphrase}</p>
+                <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-2 uppercase opacity-70">Diagnosis Result</p>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-bold opacity-90 mb-1">あなたは</span>
+                    <h1 className="text-3xl font-black tracking-tight leading-tight">
+                        「{result.animal_name}」
+                    </h1>
+                </div>
+                <p className="text-indigo-50/80 text-xs mt-3 font-medium italic">{result.catchphrase}</p>
             </div>
 
             <div className="px-5 -mt-12 space-y-6">
-                <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white text-center">
+                {/* メインカード */}
+                <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white">
                     <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl border border-indigo-100/30 shadow-inner">
                         {result.emoji}
                     </div>
+
                     <div className="space-y-6">
-                        <h2 className="inline-block px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">Your Identity</h2>
-                        <p className="text-slate-700 leading-relaxed text-base font-bold">{result.base_description}</p>
+                        <div className="space-y-3">
+                            <div className="text-center">
+                                <h2 className="inline-block px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">Your Identity</h2>
+                            </div>
+                            {/* テキストを左揃えに修正 */}
+                            <p className="text-slate-700 leading-relaxed text-[15px] font-bold px-1 text-left">
+                                {result.base_description}
+                            </p>
+                        </div>
+                        {/* 置換後のテキストを表示 */}
                         <div className="bg-slate-50/80 p-6 rounded-3xl text-slate-600 leading-relaxed text-sm whitespace-pre-wrap border border-slate-100 text-left">
-                            {result.result_text}
+                            {formattedResultText}
                         </div>
                     </div>
 
@@ -103,11 +114,12 @@ function ResultContent() {
                             <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">LINEで送る</button>
                         </div>
 
+                        {/* ボタンのテキストを変更 */}
                         <button
                             onClick={() => router.push('/list')}
                             className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100 shadow-sm active:scale-95 transition-all"
                         >
-                            他の偉人タイプ（全16種）をすべて見る →
+                            他のタイプをすべて見る →
                         </button>
                     </div>
                 </div>
@@ -123,6 +135,7 @@ function ResultContent() {
                     </div>
                 )}
 
+                {/* LINE登録誘導 */}
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
                     <div className="relative z-10">
                         <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
