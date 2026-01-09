@@ -151,6 +151,7 @@ export default function ResultPage() {
                         </a>
                     </div>
                 )}
+
                 {/* 既存のSNS共有ボタンなどの下に配置 */}
                 <div className="pt-4 px-2 text-center">
                     <button
@@ -161,6 +162,7 @@ export default function ResultPage() {
                         <span className="text-lg">→</span>
                     </button>
                 </div>
+
                 <div className="bg-green-500 rounded-[2.5rem] p-8 text-white text-center shadow-lg">
                     <h3 className="text-lg font-bold mb-2">さらに詳しい鑑定をLINEで受ける</h3>
                     <p className="text-xs opacity-90 mb-6">公式LINE限定「人生の戦略マップ」を無料配布中</p>
