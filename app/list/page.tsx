@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import resultDataRaw from '@/data/result_data.json';
 
-// 型定義
 interface AdContent {
     ad_title: string;
     ad_text: string;
@@ -27,7 +26,6 @@ export default function ListPage() {
 
     return (
         <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
-            {/* ヘッダー */}
             <div className="bg-indigo-600 pt-12 pb-20 px-6 text-center text-white rounded-b-[2.5rem] shadow-lg">
                 <div className="inline-block px-3 py-1 bg-indigo-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-400">
                     Encyclopedia
@@ -42,23 +40,29 @@ export default function ListPage() {
                 {mbtiList.map((id) => {
                     const person = resultData[id];
                     return (
-                        <div
+                        <button
                             key={id}
-                            className="bg-white rounded-3xl p-5 shadow-sm border border-white flex gap-4 items-center transition-all active:scale-[0.98]"
+                            onClick={() => router.push(`/result?type=${id}`)}
+                            className="bg-white rounded-3xl p-5 shadow-sm border border-white flex gap-4 items-center transition-all active:scale-[0.98] text-left w-full"
                         >
                             <div className="text-3xl bg-indigo-50 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
                                 {person.emoji}
                             </div>
-                            <div className="flex-1 text-left min-w-0">
+                            <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                     <h3 className="text-[16px] font-bold text-slate-800 truncate">{person.animal_name}</h3>
-                                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-tighter bg-indigo-50 px-1.5 py-0.5 rounded">{id}</span>
+                                    {/* MBTIタグを削除しました */}
                                 </div>
                                 <p className="text-[12px] text-slate-500 leading-snug line-clamp-2">
                                     {person.base_description}
                                 </p>
                             </div>
-                        </div>
+                            <div className="text-slate-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </button>
                     );
                 })}
             </div>
@@ -69,12 +73,6 @@ export default function ListPage() {
                     className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-100 active:scale-95 transition-all text-sm"
                 >
                     自分のタイプを再診断する
-                </button>
-                <button
-                    onClick={() => router.back()}
-                    className="w-full py-5 mt-4 text-slate-400 font-bold text-xs tracking-widest uppercase"
-                >
-                    ← Back
                 </button>
             </div>
         </div>
