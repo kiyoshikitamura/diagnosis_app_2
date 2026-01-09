@@ -58,11 +58,23 @@ export default function HomePage() {
         window.scrollTo(0, 0);
     };
 
+    const handleReset = () => {
+        if (confirm('最初からやり直しますか？')) {
+            localStorage.removeItem('diagnosis_answers');
+            setAnswers({});
+            setIsStarted(false);
+            setIsSecondPhase(false);
+            setCurrentStep(0);
+            window.scrollTo(0, 0);
+        }
+    };
+
     if (isAnalyzing) {
         return (
             <div className="max-w-2xl mx-auto min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
                 <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-                <h2 className="text-xl font-bold text-slate-800">英雄の魂を照合中...</h2>
+                {/* ローディングテキストの変更 */}
+                <h2 className="text-xl font-bold text-slate-800">回答を分析中...</h2>
             </div>
         );
     }
@@ -77,9 +89,10 @@ export default function HomePage() {
         );
     }
 
+    const isFinalStep = isSecondPhase && currentStep === 3;
+
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20">
-            {/* 進行バー */}
+        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans">
             <div className="sticky top-0 bg-white/90 backdrop-blur pt-4 pb-2 px-5 border-b border-slate-100 z-10">
                 <div className="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
                     <span className="tracking-widest">PROGRESS</span>
@@ -92,7 +105,6 @@ export default function HomePage() {
 
             <div className="px-5 py-6 space-y-4">
                 {currentPageQuestions.map((q, index) => {
-                    // 全体を通した設問番号の計算
                     const qNumber = isSecondPhase ? (currentStep - 1) * 10 + (index + 1) + 10 : index + 1;
 
                     return (
@@ -100,14 +112,9 @@ export default function HomePage() {
                             <div className="flex items-center gap-2 mb-3">
                                 <span className="text-[11px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">Q{qNumber}</span>
                             </div>
+                            <p className="text-[15px] font-bold text-slate-700 leading-relaxed mb-8">{q.question}</p>
 
-                            {/* 設問テキスト：サイズを小さく調整 */}
-                            <p className="text-[15px] font-bold text-slate-700 leading-relaxed mb-8">
-                                {q.question}
-                            </p>
-
-                            {/* 回答エリア */}
-                            <div className="flex justify-between items-center gap-1 max-w-sm mx-auto relative">
+                            <div className="flex justify-between items-center gap-1 max-w-sm mx-auto relative px-2">
                                 <span className="text-[10px] font-bold text-indigo-500 absolute -top-6 left-0">そう思う</span>
                                 <span className="text-[10px] font-bold text-slate-400 absolute -top-6 right-0">そう思わない</span>
 
@@ -115,18 +122,15 @@ export default function HomePage() {
                                     <button
                                         key={val}
                                         onClick={() => handleAnswer(q.id, val)}
-                                        className={`relative w-12 h-12 rounded-full border-2 transition-all duration-300 flex items-center justify-center
+                                        className={`relative w-11 h-11 rounded-full border-2 transition-all duration-300
                       ${answers[q.id] === val
-                                                ? 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-200 scale-110'
+                                                ? 'bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100 scale-110'
                                                 : 'bg-white border-slate-100'
                                             }`}
                                     >
-                                        {/* 選択時の動的なインジケーター */}
-                                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${answers[q.id] === val ? 'bg-white scale-150' : 'bg-slate-100'}`} />
-
-                                        {/* 選択時にふわっと広がるアニメーション用の輪 */}
+                                        {/* 回答の丸をシンプルな中空デザイン（〇）に変更 */}
                                         {answers[q.id] === val && (
-                                            <div className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-20" />
+                                            <div className="absolute inset-1 rounded-full border-2 border-white animate-ping opacity-40" />
                                         )}
                                     </button>
                                 ))}
@@ -135,16 +139,28 @@ export default function HomePage() {
                     );
                 })}
 
-                <button
-                    onClick={nextStep}
-                    disabled={currentPageQuestions.some(q => !answers[q.id])}
-                    className={`w-full py-5 mt-6 rounded-2xl font-bold transition-all active:scale-[0.98] ${currentPageQuestions.every(q => answers[q.id])
-                            ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100'
-                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                        }`}
-                >
-                    {isSecondPhase && currentStep === 3 ? '結果を解析する' : '次の設問へ'}
-                </button>
+                <div className="pt-6 space-y-4">
+                    <button
+                        onClick={nextStep}
+                        disabled={currentPageQuestions.some(q => !answers[q.id])}
+                        className={`w-full py-5 rounded-2xl font-bold transition-all active:scale-[0.98] ${currentPageQuestions.every(q => answers[q.id])
+                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100'
+                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                            }`}
+                    >
+                        {isFinalStep ? '結果を解析する' : '次の設問へ'}
+                    </button>
+
+                    {/* 最終ステップ（40問目終了時）以外で表示する「最初からやり直す」ボタン */}
+                    {!isFinalStep && (
+                        <button
+                            onClick={handleReset}
+                            className="w-full py-4 bg-white text-slate-400 rounded-2xl font-bold border border-slate-200 active:scale-95 transition-all text-xs tracking-widest uppercase shadow-sm"
+                        >
+                            最初からやり直す
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
