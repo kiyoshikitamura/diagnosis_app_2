@@ -50,16 +50,12 @@ export default function ResultPage() {
                 const answers: Record<string, number> = JSON.parse(savedAnswersStr);
                 const mbtiList = ["entj", "estj", "enfj", "infj", "intj", "estp", "entp", "intp", "istj", "esfj", "isfj", "istp", "infp", "enfp", "esfp", "isfp"];
 
-                // 判定ロジック：回答の合計からインデックスを算出
+                // 判定ロジック：回答の合計からインデックスを算出（暫定安全策）
                 const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
                 const mbtiIndex = totalScore % mbtiList.length;
                 const topGroupId = mbtiList[mbtiIndex];
 
-                // --- 安全なデータ取得ロジック ---
-                // 1. 指定のIDで取得を試みる
                 let coreData = resultData[topGroupId];
-
-                // 2. もし見つからなければ、JSONの最初のデータを使う
                 if (!coreData) {
                     const firstKey = Object.keys(resultData)[0];
                     coreData = resultData[firstKey];
@@ -67,18 +63,13 @@ export default function ResultPage() {
 
                 if (coreData) {
                     setResult(coreData);
-
-                    // 3. 広告データの取得（オプショナルチェーン ?. でクラッシュを防止）
-                    // 属性に一致するものがなければ、monetizationの中の最初のデータを使う
                     const selectedAd = coreData.monetization?.[userAttribute] ||
                         Object.values(coreData.monetization || {})[0];
-
                     setAdContent(selectedAd || null);
                 }
             } catch (error) {
                 console.error('Fatal Analysis Error:', error);
             } finally {
-                // 何があっても0.5秒後には読み込み画面を消す
                 setTimeout(() => setLoading(false), 500);
             }
         };
@@ -88,7 +79,7 @@ export default function ResultPage() {
 
     // シェア用
     const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！` : '';
+    const shareText = result ? `私の魂に宿る偉人は「${result.animal_name}」でした！\n#偉人診断 #才能プロファイリング\n` : '';
 
     if (loading) {
         return (
@@ -99,27 +90,21 @@ export default function ResultPage() {
         );
     }
 
-    // 万が一データが空の場合の表示
-    if (!result) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
-                <p className="text-slate-400 mb-6">解析データが見つかりませんでした。</p>
-                <button onClick={() => router.push('/')} className="py-4 px-10 bg-indigo-600 text-white rounded-2xl font-bold">トップに戻る</button>
-            </div>
-        );
-    }
+    if (!result) return null;
 
     return (
-        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
+        <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900 overflow-x-hidden">
+            {/* ヒーローセクション */}
             <div className="bg-indigo-600 pt-16 pb-24 px-6 text-center text-white rounded-b-[3rem] shadow-lg">
                 <p className="text-indigo-100 font-bold tracking-[0.2em] text-[10px] mb-3 uppercase opacity-70">Diagnosis Result</p>
                 <h1 className="text-3xl font-black mb-1">あなたは「{result.animal_name}」</h1>
-                <p className="text-indigo-50/80 text-sm font-medium">{result.catchphrase}</p>
+                <p className="text-indigo-50/80 text-sm font-medium italic">{result.catchphrase}</p>
             </div>
 
             <div className="px-5 -mt-12 space-y-6">
+                {/* メインカード */}
                 <div className="bg-white rounded-[2.5rem] shadow-sm p-8 space-y-8 border border-white">
-                    <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl border border-indigo-100/30">
+                    <div className="w-24 h-24 bg-indigo-50 rounded-3xl mx-auto flex items-center justify-center text-5xl border border-indigo-100/30 shadow-inner">
                         {result.emoji}
                     </div>
 
@@ -136,37 +121,44 @@ export default function ResultPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-4">
-                        <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs">𝕏でシェア</button>
-                        <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs">LINEで送る</button>
+                        <button onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">𝕏でシェア</button>
+                        <button onClick={() => window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`)} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-xs active:scale-95 transition-all">LINEで送る</button>
                     </div>
                 </div>
 
+                {/* 属性別マネタイズ枠 */}
                 {adContent && (
                     <div className="bg-white rounded-[2.5rem] p-8 border border-indigo-100 shadow-sm">
-                        <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded mb-3 uppercase">Recommended</span>
+                        <span className="inline-block px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded mb-3 uppercase tracking-tighter">Recommended</span>
                         <h3 className="text-lg font-bold mb-2 text-slate-800">{adContent.ad_title}</h3>
                         <p className="text-slate-500 text-xs mb-6 leading-relaxed">{adContent.ad_text}</p>
-                        <a href="#" className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100">
+                        <a href="#" className="flex items-center justify-center w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100 active:scale-95 transition-transform">
                             {adContent.ad_link_text}
                         </a>
                     </div>
                 )}
 
-                {/* 既存のSNS共有ボタンなどの下に配置 */}
-                <div className="pt-4 px-2 text-center">
+                {/* 他の偉人を見るリンク（追加箇所） */}
+                <div className="py-4 text-center">
                     <button
                         onClick={() => router.push('/list')}
-                        className="text-indigo-600 font-bold text-sm flex items-center justify-center gap-2 mx-auto"
+                        className="group flex items-center justify-center gap-2 mx-auto py-2 px-6 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
                     >
-                        <span>他の偉人タイプもすべて見る</span>
-                        <span className="text-lg">→</span>
+                        <span className="text-sm font-bold">全16タイプの偉人リストを見る</span>
+                        <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
                     </button>
                 </div>
 
-                <div className="bg-green-500 rounded-[2.5rem] p-8 text-white text-center shadow-lg">
-                    <h3 className="text-lg font-bold mb-2">さらに詳しい鑑定をLINEで受ける</h3>
-                    <p className="text-xs opacity-90 mb-6">公式LINE限定「人生の戦略マップ」を無料配布中</p>
-                    <a href="https://line.me/R/ti/p/YOUR_LINE_ID" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm">LINE公式アカウントを登録</a>
+                {/* LINE登録誘導枠 */}
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2.5rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
+                    <div className="relative z-10">
+                        <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
+                        <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
+                        <a href="https://line.me/R/ti/p/YOUR_LINE_ID" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform">
+                            LINE公式アカウントを登録
+                        </a>
+                    </div>
+                    <div className="absolute -right-4 -bottom-4 text-6xl opacity-20 rotate-12 pointer-events-none">📱</div>
                 </div>
 
                 <button onClick={() => router.push('/')} className="w-full py-6 text-slate-300 font-bold text-xs tracking-widest uppercase hover:text-indigo-500 transition-colors">
