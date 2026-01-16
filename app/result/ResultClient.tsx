@@ -2,24 +2,11 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+// fallback用にimportしておく
 import resultDataRaw from '@/data/result_data.json';
 
-// --- 型定義 ---
-interface AdContent {
-    ad_title: string;
-    ad_text: string;
-    ad_link_text: string;
-    a8_html?: string;
-}
-
-interface ResultData {
-    animal_name: string;
-    emoji: string;
-    catchphrase: string;
-    base_description: string;
-    result_text: string;
-    monetization: Record<string, AdContent>;
-}
+interface AdContent { ad_title: string; ad_text: string; ad_link_text: string; a8_html?: string; }
+interface ResultData { animal_name: string; emoji: string; catchphrase: string; base_description: string; result_text: string; monetization: Record<string, AdContent>; }
 
 const resultData = resultDataRaw as Record<string, ResultData>;
 
@@ -33,7 +20,7 @@ function ResultContent() {
     const [fullShareUrl, setFullShareUrl] = useState('');
 
     useEffect(() => {
-        const processResult = () => {
+        const processResult = async () => {
             try {
                 const typeParam = searchParams.get('type');
                 const userAttribute = typeof window !== 'undefined' ? (localStorage.getItem('user_attribute') || 'cas_male') : 'cas_male';
@@ -43,26 +30,36 @@ function ResultContent() {
                     return;
                 }
 
-                const coreData = resultData[typeParam];
-                setResult(coreData);
+                // GitHubにあることが確認できたので、最新のJSONをfetchで再取得を試みる（キャッシュ対策）
+                let activeData = resultData[typeParam];
+                try {
+                    const res = await fetch('/result_data.json');
+                    if (res.ok) {
+                        const freshData = await res.json();
+                        if (freshData[typeParam]) {
+                            activeData = freshData[typeParam];
+                        }
+                    }
+                } catch (e) {
+                    console.log("Fetch fallback used");
+                }
+
+                setResult(activeData);
                 setResultId(typeParam);
 
-                // 広告データの抽出（フォールバック付き）
-                const monetizationMap = coreData.monetization || {};
+                // 広告抽出ロジックの強化
+                const monetizationMap = activeData.monetization || {};
                 let selectedAd = monetizationMap[userAttribute] || Object.values(monetizationMap)[0] || null;
 
                 setAdContent(selectedAd);
                 setFullShareUrl(`https://daiakksindan.jp/result?type=${typeParam}`);
 
-                // Meta Pixel (Facebook)
+                // Meta Pixel
                 const fb = (window as any).fbq;
-                if (typeof fb === 'function') {
-                    fb('track', 'CompleteRegistration');
-                }
+                if (typeof fb === 'function') fb('track', 'CompleteRegistration');
 
             } catch (error) {
-                console.error("Result Page Error:", error);
-                router.replace('/');
+                console.error("Error:", error);
             } finally {
                 setLoading(false);
             }
@@ -83,19 +80,11 @@ function ResultContent() {
 
     return (
         <div className="max-w-2xl mx-auto min-h-screen bg-slate-50 pb-20 font-sans text-slate-900 overflow-x-hidden">
-
-            {/* 1. 結果画像エリア */}
             <div className="w-full bg-white shadow-md leading-[0]">
-                <img
-                    src={`/results/${resultId}.png`}
-                    alt={result.animal_name}
-                    className="w-full h-auto block"
-                />
+                <img src={`/results/${resultId}.png`} alt={result.animal_name} className="w-full h-auto block" />
             </div>
 
             <div className="px-5 mt-6 space-y-6">
-
-                {/* 2. 分析テキストカード（最新デザイン復旧） */}
                 <div className="bg-white rounded-[2rem] shadow-sm p-8 space-y-6 border border-slate-50">
                     <div className="space-y-3">
                         <div className="text-center">
@@ -115,25 +104,22 @@ function ResultContent() {
                                 window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(fullShareUrl + '&v=' + cacheBust)}&text=${encodeURIComponent(shareText)}`);
                             }} className="py-4 bg-[#06C755] text-white rounded-2xl font-bold text-[10px] active:scale-95 transition-transform">LINE</button>
                         </div>
-
-                        <button onClick={() => router.push('/list')} className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100 shadow-sm transition-all hover:bg-indigo-100 active:scale-95">
-                            他のタイプをすべて見る →
-                        </button>
+                        <button onClick={() => router.push('/list')} className="w-full py-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold text-sm border border-indigo-100 shadow-sm transition-all hover:bg-indigo-100 active:scale-95">他のタイプをすべて見る →</button>
                     </div>
                 </div>
 
-                {/* 3. ターゲット広告エリア（最新デザイン復旧 ＆ 広告表示） */}
+                {/* ターゲット広告エリア */}
                 {adContent && adContent.a8_html && (
                     <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm overflow-hidden text-center">
-                        <div className="flex items-center justify-center gap-2 mb-6">
+                        <div className="flex items-center justify-center gap-2 mb-6 text-slate-400">
                             <div className="h-[1px] w-8 bg-slate-100"></div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Recommended</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Recommended</span>
                             <div className="h-[1px] w-8 bg-slate-100"></div>
                         </div>
 
                         <div className="relative inline-block w-full min-h-[50px]">
                             <div
-                                className="flex items-center justify-center [&>a]:inline-block [&>a>img]:max-w-full [&>a>img]:h-auto [&>a>img]:rounded-xl transition-transform active:scale-95"
+                                className="flex items-center justify-center [&>a]:inline-block [&>a>img]:max-w-full [&>a>img]:h-auto [&>a>img]:rounded-xl"
                                 dangerouslySetInnerHTML={{ __html: adContent.a8_html }}
                             />
                         </div>
@@ -144,18 +130,13 @@ function ResultContent() {
                     </div>
                 )}
 
-                {/* 4. LINE公式誘導（最新デザイン復旧） */}
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-[2rem] p-8 text-white text-center shadow-lg relative overflow-hidden">
                     <h3 className="text-lg font-bold mb-2">公式鑑定をLINEで受ける</h3>
                     <p className="text-xs opacity-90 mb-6 leading-relaxed">あなたの強みを最大化する<br />「人生の戦略マップ」を無料配布中</p>
-                    <a href="https://lin.ee/hW4POqg" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform no-underline">
-                        LINE公式アカウントを登録
-                    </a>
+                    <a href="https://lin.ee/hW4POqg" className="flex items-center justify-center w-full py-4 bg-white text-green-600 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-transform no-underline">LINE公式アカウントを登録</a>
                 </div>
 
-                <button onClick={() => { localStorage.clear(); router.push('/'); }} className="w-full py-4 text-slate-400 font-bold text-[10px] tracking-widest uppercase active:text-slate-600 transition-colors">
-                    ← Back to Top
-                </button>
+                <button onClick={() => { localStorage.clear(); router.push('/'); }} className="w-full py-4 text-slate-400 font-bold text-[10px] tracking-widest uppercase active:text-slate-600 transition-colors">← Back to Top</button>
             </div>
         </div>
     );
