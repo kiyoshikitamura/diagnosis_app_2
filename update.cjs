@@ -5,94 +5,88 @@ const csvPath = path.join(__dirname, 'diagnosis_links.csv');
 const jsonPath = path.join(__dirname, 'data', 'result_data.json');
 const publicJsonPath = path.join(__dirname, 'public', 'result_data.json');
 
+/**
+ * 広告コードの徹底的な掃除と属性の引用符補完
+ */
 function cleanA8Html(html) {
     if (!html) return "";
-
-    // CSVから読み込まれた生の文字列を極限まで掃除
     let clean = html.trim();
 
-    // 外側の引用符を剥ぎ取る
+    // 1. CSV特有の外側の引用符を剥ぎ取る
     if (clean.startsWith('"')) clean = clean.substring(1);
     if (clean.endsWith('"')) clean = clean.substring(0, clean.length - 1);
 
-    // 連続する引用符 "" を " に、エスケープ \" を " に
-    clean = clean.replace(/""/g, '"');
+    // 2. エスケープや重複引用符を一度リセット
     clean = clean.replace(/\\"/g, '"');
-
-    // バックスラッシュが残るのを防ぐ
+    clean = clean.replace(/""/g, '"');
     clean = clean.replace(/\\/g, '');
+
+    // 3. 【最重要】属性値に引用符がない場合に強制的に付ける
+    // src=/ads/test.jpg  ->  src="/ads/test.jpg"
+    // width=300          ->  width="300"
+    // 正規表現で属性の値をキャプチャし、引用符で囲み直す
+    clean = clean.replace(/(src|width|height|href|alt|rel)=([^"'\s>]+)/g, '$1="$2"');
 
     return clean;
 }
 
-function parseCsvRow(row) {
+/**
+ * CSVパース関数（カンマ対応）
+ */
+function parseCsvLine(line) {
     const result = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < row.length; i++) {
-        const char = row[i];
-        const nextChar = row[i + 1];
-
-        if (char === '"' && inQuotes && nextChar === '"') {
-            current += '"';
-            i++;
-        } else if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            result.push(current);
-            current = '';
+    let cur = '';
+    let inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuote = !inQuote;
+        } else if (char === ',' && !inQuote) {
+            result.push(cur);
+            cur = '';
         } else {
-            current += char;
+            cur += char;
         }
     }
-    result.push(current);
+    result.push(cur);
     return result;
 }
 
 async function updateJson() {
     try {
-        // 1. ファイルを読み込む（キャッシュ回避のため毎回読み込み）
         if (!fs.existsSync(jsonPath)) {
-            console.error('❌ JSON file not found at:', jsonPath);
+            console.error('❌ JSONが見つかりません:', jsonPath);
             return;
         }
 
-        const fileContent = fs.readFileSync(jsonPath, 'utf8');
-        const jsonData = JSON.parse(fileContent);
-
+        const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
         const csvData = fs.readFileSync(csvPath, 'utf8');
         const rows = csvData.split(/\r?\n/);
-
-        console.log(`Processing ${rows.length - 1} rows from CSV...`);
 
         for (let i = 1; i < rows.length; i++) {
             if (!rows[i].trim()) continue;
 
-            const columns = parseCsvRow(rows[i]);
-            if (columns.length < 6) continue;
+            const cols = parseCsvLine(rows[i]);
+            if (cols.length < 6) continue;
 
-            const [type, attribute, ad_title, ad_text, ad_link_text, a8_html] = columns;
+            const [type, attr, title, text, linkText, a8HtmlRaw] = cols;
             const t = type.trim().toLowerCase();
-            const a = attribute.trim().toLowerCase();
+            const a = attr.trim().toLowerCase();
 
             if (jsonData[t]) {
                 if (!jsonData[t].monetization) jsonData[t].monetization = {};
-
                 jsonData[t].monetization[a] = {
-                    ad_title: ad_title || "",
-                    ad_text: ad_text || "",
-                    ad_link_text: ad_link_text || "",
-                    // クリーンアップを2段階で適用
-                    a8_html: cleanA8Html(a8_html)
+                    ad_title: title,
+                    ad_text: text,
+                    ad_link_text: linkText,
+                    a8_html: cleanA8Html(a8HtmlRaw)
                 };
             }
         }
 
-        // 2. 物理的な保存（インデントを維持して保存）
         const output = JSON.stringify(jsonData, null, 2);
 
-        // dataフォルダとpublicフォルダの両方に上書き
+        // 物理ファイルへの書き込み
         fs.writeFileSync(jsonPath, output, 'utf8');
 
         if (!fs.existsSync(path.dirname(publicJsonPath))) {
@@ -100,16 +94,15 @@ async function updateJson() {
         }
         fs.writeFileSync(publicJsonPath, output, 'utf8');
 
-        console.log('✅ Update Complete.');
+        console.log('✅ Success: JSON has been cleaned and synced.');
 
-        // 3. 最後に直接ファイルを読み直して中身を確認するデバッグ
-        const reRead = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        const finalCheck = reRead['entj']?.monetization['high_male']?.a8_html;
-        console.log('--- Final Check ---');
-        console.log(finalCheck);
+        // デバッグ確認
+        const check = jsonData['entj']?.monetization['high_male']?.a8_html;
+        console.log('--- Final Check Output ---');
+        console.log(check);
 
-    } catch (error) {
-        console.error('❌ Error:', error);
+    } catch (e) {
+        console.error('❌ Error:', e);
     }
 }
 
